@@ -1,5 +1,6 @@
 import { useState, useRef } from 'react';
 import { uploadAudio } from '../lib/storage';
+import { Mic, Square } from 'lucide-react';
 
 interface AudioRecorderProps {
   onRecorded: (audioPath: string) => void;
@@ -60,7 +61,7 @@ export function AudioRecorder({ onRecorded }: AudioRecorderProps) {
 
   if (isUploading) {
     return (
-      <button disabled className="px-4 py-2 bg-gray-600 text-gray-300 rounded-lg">
+      <button disabled className="px-4 py-2 border border-white/20 text-white/30 rounded-lg cursor-not-allowed flex items-center gap-2">
         Uploading...
       </button>
     );
@@ -70,13 +71,23 @@ export function AudioRecorder({ onRecorded }: AudioRecorderProps) {
     <div className="flex flex-col gap-2">
       <button
         onClick={isRecording ? stopRecording : startRecording}
-        className={`px-4 py-2 rounded-lg transition-colors ${
+        className={`px-4 py-2 rounded-lg transition-colors flex items-center gap-2 ${
           isRecording
-            ? 'bg-red-600 hover:bg-red-700 text-white'
-            : 'bg-blue-600 hover:bg-blue-700 text-white'
+            ? 'border border-red-400/50 hover:border-red-400 text-red-400/70 hover:text-red-400'
+            : 'border border-white/50 hover:border-white text-white/70 hover:text-white'
         }`}
       >
-        {isRecording ? 'Stop Recording' : 'Record'}
+        {isRecording ? (
+          <>
+            <Square size={18} />
+            Stop Recording
+          </>
+        ) : (
+          <>
+            <Mic size={18} />
+            Record
+          </>
+        )}
       </button>
       {error && <span className="text-red-400 text-sm">{error}</span>}
     </div>

@@ -1,3 +1,6 @@
+import { useState } from 'react';
+import { addToLibrary } from '../lib/db';
+import { ChevronUp, ChevronDown, Star, Pencil, Trash2 } from 'lucide-react';
 import type { Progression } from '../types';
 
 interface ProgressionCardProps {
@@ -19,24 +22,49 @@ export function ProgressionCard({
   canMoveUp,
   canMoveDown,
 }: ProgressionCardProps) {
+  const [isSaving, setIsSaving] = useState(false);
+  const [saveMessage, setSaveMessage] = useState<string | null>(null);
+
+  const handleSaveToLibrary = async () => {
+    setIsSaving(true);
+    setSaveMessage(null);
+    try {
+      await addToLibrary({
+        name: progression.name,
+        chords: progression.chords,
+        instrument: progression.instrument,
+        notes: progression.notes,
+        audio_path: progression.audio_path,
+      });
+      setSaveMessage('Saved!');
+      setTimeout(() => setSaveMessage(null), 2000);
+    } catch (err) {
+      console.error('Failed to save to library:', err);
+      setSaveMessage('Failed');
+      setTimeout(() => setSaveMessage(null), 2000);
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
   return (
     <div className="bg-gray-800 rounded-lg p-4 flex items-center gap-4">
       <div className="flex flex-col gap-1">
         <button
           onClick={onMoveUp}
           disabled={!canMoveUp}
-          className="text-gray-400 hover:text-white disabled:opacity-30 disabled:cursor-not-allowed"
+          className="p-1 border border-white/50 hover:border-white text-white/70 hover:text-white rounded transition-colors disabled:border-white/20 disabled:text-white/30 disabled:cursor-not-allowed"
           aria-label="Move up"
         >
-          &#9650;
+          <ChevronUp size={14} />
         </button>
         <button
           onClick={onMoveDown}
           disabled={!canMoveDown}
-          className="text-gray-400 hover:text-white disabled:opacity-30 disabled:cursor-not-allowed"
+          className="p-1 border border-white/50 hover:border-white text-white/70 hover:text-white rounded transition-colors disabled:border-white/20 disabled:text-white/30 disabled:cursor-not-allowed"
           aria-label="Move down"
         >
-          &#9660;
+          <ChevronDown size={14} />
         </button>
       </div>
 
@@ -44,7 +72,7 @@ export function ProgressionCard({
         {progression.name && (
           <div className="text-sm text-gray-400 mb-1">{progression.name}</div>
         )}
-        <div className="text-lg font-semibold text-white truncate">
+        <div className="text-lg font-light text-white truncate">
           {progression.chords}
         </div>
         {progression.instrument && (
@@ -55,18 +83,28 @@ export function ProgressionCard({
         )}
       </div>
 
-      <div className="flex gap-2">
+      <div className="flex gap-2 items-center">
+        <button
+          onClick={handleSaveToLibrary}
+          disabled={isSaving}
+          className="p-2 border border-white/50 hover:border-white text-white/70 hover:text-white rounded transition-colors disabled:border-white/20 disabled:text-white/30 disabled:cursor-not-allowed"
+          title="Save to Library"
+        >
+          {isSaving ? '...' : saveMessage || <Star size={14} />}
+        </button>
         <button
           onClick={onEdit}
-          className="px-3 py-1 bg-blue-600 hover:bg-blue-700 text-white rounded text-sm transition-colors"
+          className="p-2 border border-white/50 hover:border-white text-white/70 hover:text-white rounded transition-colors"
+          title="Edit"
         >
-          Edit
+          <Pencil size={14} />
         </button>
         <button
           onClick={onDelete}
-          className="px-3 py-1 bg-red-600 hover:bg-red-700 text-white rounded text-sm transition-colors"
+          className="p-2 border border-red-400/50 hover:border-red-400 text-red-400/70 hover:text-red-400 rounded transition-colors"
+          title="Delete"
         >
-          Delete
+          <Trash2 size={14} />
         </button>
       </div>
     </div>

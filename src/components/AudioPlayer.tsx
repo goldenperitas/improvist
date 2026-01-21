@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import { getAudioUrl } from '../lib/storage';
+import { Play, Pause } from 'lucide-react';
 
 interface AudioPlayerProps {
   audioPath: string;
@@ -67,7 +68,7 @@ export function AudioPlayer({ audioPath }: AudioPlayerProps) {
     return (
       <button
         disabled
-        className="px-4 py-2 bg-gray-700 text-gray-400 rounded-lg"
+        className="px-4 py-2 border border-white/20 text-white/30 rounded-lg cursor-not-allowed"
       >
         Loading...
       </button>
@@ -85,9 +86,19 @@ export function AudioPlayer({ audioPath }: AudioPlayerProps) {
       {audioUrl && <audio ref={audioRef} src={audioUrl} preload="auto" />}
       <button
         onClick={togglePlayback}
-        className="px-4 py-2 bg-gray-800 text-white rounded-lg hover:bg-gray-700 transition-colors"
+        className="px-4 py-2 border border-white/50 hover:border-white text-white/70 hover:text-white rounded-lg transition-colors flex items-center gap-2"
       >
-        {isPlaying ? 'Pause' : 'Play'}
+        {isPlaying ? (
+          <>
+            <Pause size={18} />
+            Pause
+          </>
+        ) : (
+          <>
+            <Play size={18} />
+            Play
+          </>
+        )}
       </button>
     </>
   );

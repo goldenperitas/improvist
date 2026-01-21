@@ -3,6 +3,7 @@ import type { Progression } from '../types';
 import { AudioRecorder } from './AudioRecorder';
 import { AudioPlayer } from './AudioPlayer';
 import { uploadAudio } from '../lib/storage';
+import { Upload, X, Plus, Check } from 'lucide-react';
 
 interface ProgressionFormProps {
   progression?: Progression;
@@ -59,7 +60,7 @@ export function ProgressionForm({ progression, onSave, onCancel }: ProgressionFo
           value={name}
           onChange={(e) => setName(e.target.value)}
           placeholder="e.g., Intro, Verse, Chorus"
-          className="w-full px-3 py-2 bg-gray-700 text-white rounded border border-gray-600 focus:border-blue-500 focus:outline-none"
+          className="w-full px-3 py-2 bg-gray-700 text-white rounded border border-gray-600 focus:border-white/50 focus:outline-none"
         />
       </div>
 
@@ -70,7 +71,7 @@ export function ProgressionForm({ progression, onSave, onCancel }: ProgressionFo
           value={chords}
           onChange={(e) => setChords(e.target.value)}
           placeholder="e.g., Dm7 - G7 - Cmaj7 - Am7"
-          className="w-full px-3 py-2 bg-gray-700 text-white rounded border border-gray-600 focus:border-blue-500 focus:outline-none"
+          className="w-full px-3 py-2 bg-gray-700 text-white rounded border border-gray-600 focus:border-white/50 focus:outline-none"
           required
         />
       </div>
@@ -80,7 +81,7 @@ export function ProgressionForm({ progression, onSave, onCancel }: ProgressionFo
         <select
           value={instrument}
           onChange={(e) => setInstrument(e.target.value)}
-          className="w-full px-3 py-2 bg-gray-700 text-white rounded border border-gray-600 focus:border-blue-500 focus:outline-none"
+          className="w-full px-3 py-2 bg-gray-700 text-white rounded border border-gray-600 focus:border-white/50 focus:outline-none"
         >
           <option value="">Select instrument...</option>
           {INSTRUMENTS.map((inst) => (
@@ -96,7 +97,7 @@ export function ProgressionForm({ progression, onSave, onCancel }: ProgressionFo
           onChange={(e) => setNotes(e.target.value)}
           placeholder="Any additional notes..."
           rows={3}
-          className="w-full px-3 py-2 bg-gray-700 text-white rounded border border-gray-600 focus:border-blue-500 focus:outline-none resize-none"
+          className="w-full px-3 py-2 bg-gray-700 text-white rounded border border-gray-600 focus:border-white/50 focus:outline-none resize-none"
         />
       </div>
 
@@ -105,7 +106,8 @@ export function ProgressionForm({ progression, onSave, onCancel }: ProgressionFo
         <div className="flex flex-wrap gap-3 items-center">
           <AudioRecorder onRecorded={setAudioPath} />
           <span className="text-gray-500">or</span>
-          <label className="px-4 py-2 bg-gray-700 hover:bg-gray-600 text-white rounded-lg cursor-pointer transition-colors">
+          <label className="px-4 py-2 border border-white/50 hover:border-white text-white/70 hover:text-white rounded-lg cursor-pointer transition-colors flex items-center gap-2">
+            <Upload size={18} />
             {isUploading ? 'Uploading...' : 'Upload File'}
             <input
               type="file"
@@ -122,9 +124,10 @@ export function ProgressionForm({ progression, onSave, onCancel }: ProgressionFo
             <button
               type="button"
               onClick={() => setAudioPath('')}
-              className="text-red-400 hover:text-red-300 text-sm"
+              className="p-2 border border-red-400/50 hover:border-red-400 text-red-400/70 hover:text-red-400 rounded transition-colors"
+              title="Remove audio"
             >
-              Remove
+              <X size={14} />
             </button>
           </div>
         )}
@@ -133,14 +136,15 @@ export function ProgressionForm({ progression, onSave, onCancel }: ProgressionFo
       <div className="flex gap-3 pt-2">
         <button
           type="submit"
-          className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors"
+          className="px-4 py-2 border border-white/50 hover:border-white text-white/70 hover:text-white rounded-lg transition-colors flex items-center gap-2"
         >
+          {progression ? <Check size={18} /> : <Plus size={18} />}
           {progression ? 'Update' : 'Add'} Progression
         </button>
         <button
           type="button"
           onClick={onCancel}
-          className="px-4 py-2 bg-gray-700 hover:bg-gray-600 text-white rounded-lg transition-colors"
+          className="px-4 py-2 text-gray-400 hover:text-white transition-colors"
         >
           Cancel
         </button>
