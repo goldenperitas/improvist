@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useAuth } from '../hooks/useAuth';
+import { Send } from 'lucide-react';
 
 export function Login() {
   const { signInWithEmail } = useAuth();
@@ -29,7 +30,7 @@ export function Login() {
   return (
     <div className="min-h-screen bg-gray-900 flex items-center justify-center p-4">
       <div className="w-full max-w-md">
-        <h1 className="text-4xl font-bold text-white text-center mb-2">Improvist</h1>
+        <h1 className="text-4xl font-extralight text-white text-center mb-2">Improvist</h1>
         <p className="text-gray-400 text-center mb-8">Chord progressions for live performance</p>
 
         <form onSubmit={handleSubmit} className="bg-gray-800 rounded-lg p-6 space-y-4">
@@ -40,7 +41,7 @@ export function Login() {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               placeholder="you@example.com"
-              className="w-full px-3 py-2 bg-gray-700 text-white rounded border border-gray-600 focus:border-blue-500 focus:outline-none"
+              className="w-full px-3 py-2 bg-gray-700 text-white rounded border border-gray-600 focus:border-white/50 focus:outline-none"
               required
             />
           </div>
@@ -48,8 +49,9 @@ export function Login() {
           <button
             type="submit"
             disabled={isLoading}
-            className="w-full py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-800 disabled:cursor-not-allowed text-white rounded-lg transition-colors"
+            className="w-full py-2 border border-white/50 hover:border-white text-white/70 hover:text-white rounded-lg transition-colors flex items-center justify-center gap-2 disabled:border-white/20 disabled:text-white/30 disabled:cursor-not-allowed"
           >
+            <Send size={18} />
             {isLoading ? 'Sending...' : 'Send Magic Link'}
           </button>
 

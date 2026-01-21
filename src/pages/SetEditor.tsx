@@ -7,11 +7,14 @@ import {
   updateProgression,
   deleteProgression,
   reorderProgressions,
+  copyFromLibrary,
 } from '../lib/db';
 import { exportSetToJson } from '../lib/export';
 import { ProgressionCard } from '../components/ProgressionCard';
 import { ProgressionForm } from '../components/ProgressionForm';
-import type { Set, Progression } from '../types';
+import { LibrarySelector } from '../components/LibrarySelector';
+import { ArrowLeft, Download, Play, Plus, BookPlus } from 'lucide-react';
+import type { Set, Progression, LibraryProgression } from '../types';
 
 export function SetEditor() {
   const { id } = useParams<{ id: string }>();
@@ -21,6 +24,7 @@ export function SetEditor() {
   const [setName, setSetName] = useState('');
   const [editingProgression, setEditingProgression] = useState<Progression | null>(null);
   const [isAddingNew, setIsAddingNew] = useState(false);
+  const [isLibraryOpen, setIsLibraryOpen] = useState(false);
 
   useEffect(() => {
     if (id) {
@@ -124,6 +128,22 @@ export function SetEditor() {
     }
   };
 
+  const handleSelectFromLibrary = async (libraryProgression: LibraryProgression) => {
+    if (!set) return;
+
+    try {
+      const position = set.progressions?.length || 0;
+      const newProgression = await copyFromLibrary(libraryProgression.id, set.id, position);
+      setSet({
+        ...set,
+        progressions: [...(set.progressions || []), newProgression],
+      });
+      setIsLibraryOpen(false);
+    } catch (err) {
+      console.error('Failed to add from library:', err);
+    }
+  };
+
   if (isLoading) {
     return (
       <div className="min-h-screen bg-gray-900 flex items-center justify-center">
@@ -137,7 +157,7 @@ export function SetEditor() {
       <div className="min-h-screen bg-gray-900 flex items-center justify-center">
         <div className="text-center">
           <div className="text-gray-400 mb-4">Set not found</div>
-          <Link to="/" className="text-blue-400 hover:text-blue-300">
+          <Link to="/" className="text-white/70 hover:text-white">
             Back to Home
           </Link>
         </div>
@@ -151,39 +171,52 @@ export function SetEditor() {
         <div className="flex items-center gap-4 mb-6">
           <button
             onClick={() => navigate('/')}
-            className="text-gray-400 hover:text-white transition-colors"
+            className="p-2 border border-white/50 hover:border-white text-white/70 hover:text-white rounded transition-colors"
+            title="Back"
           >
-            &larr; Back
+            <ArrowLeft size={18} />
           </button>
           <input
             type="text"
             value={setName}
             onChange={(e) => setSetName(e.target.value)}
             onBlur={handleUpdateSetName}
-            className="flex-1 text-2xl font-bold bg-transparent text-white border-b border-transparent focus:border-gray-600 focus:outline-none"
+            className="flex-1 text-2xl font-extralight bg-transparent text-white border-b border-transparent focus:border-gray-600 focus:outline-none"
           />
           <button
             onClick={handleExport}
-            className="text-gray-400 hover:text-white text-sm transition-colors"
+            className="p-2 border border-white/50 hover:border-white text-white/70 hover:text-white rounded transition-colors"
+            title="Export"
           >
-            Export
+            <Download size={18} />
           </button>
         </div>
 
         <div className="flex gap-2 mb-6">
           <Link
             to={`/set/${set.id}/perform`}
-            className="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg transition-colors"
+            className="px-4 py-2 border border-white/50 hover:border-white text-white/70 hover:text-white rounded-lg transition-colors flex items-center gap-2"
           >
+            <Play size={18} />
             Start Performance
           </Link>
           {!isAddingNew && !editingProgression && (
-            <button
-              onClick={() => setIsAddingNew(true)}
-              className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors"
-            >
-              Add Progression
-            </button>
+            <>
+              <button
+                onClick={() => setIsAddingNew(true)}
+                className="px-4 py-2 border border-white/50 hover:border-white text-white/70 hover:text-white rounded-lg transition-colors flex items-center gap-2"
+              >
+                <Plus size={18} />
+                Add Progression
+              </button>
+              <button
+                onClick={() => setIsLibraryOpen(true)}
+                className="px-4 py-2 border border-white/50 hover:border-white text-white/70 hover:text-white rounded-lg transition-colors flex items-center gap-2"
+              >
+                <BookPlus size={18} />
+                Add from Library
+              </button>
+            </>
           )}
         </div>
 
@@ -229,6 +262,12 @@ export function SetEditor() {
           )
         )}
       </div>
+
+      <LibrarySelector
+        isOpen={isLibraryOpen}
+        onClose={() => setIsLibraryOpen(false)}
+        onSelect={handleSelectFromLibrary}
+      />
     </div>
   );
 }
