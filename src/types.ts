@@ -17,3 +17,14 @@ export interface Set {
   created_at: string;
   progressions?: Progression[];
 }
+
+export interface LibraryProgression {
+  id: string;
+  user_id: string;
+  name?: string;
+  chords: string;
+  instrument?: string;
+  notes?: string;
+  audio_path?: string;
+  created_at?: string;
+}

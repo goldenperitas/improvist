@@ -1,5 +1,5 @@
 import { supabase } from './supabase';
-import type { Set, Progression } from '../types';
+import type { Set, Progression, LibraryProgression } from '../types';
 
 // Sets CRUD
 export async function getSets(): Promise<Set[]> {
@@ -140,4 +140,72 @@ export async function reorderProgressions(
   );
 
   await Promise.all(updates);
+}
+
+// Library CRUD
+export async function getLibraryProgressions(): Promise<LibraryProgression[]> {
+  const { data, error } = await supabase
+    .from('progression_library')
+    .select('*')
+    .order('created_at', { ascending: false });
+
+  if (error) throw error;
+  return data || [];
+}
+
+export async function addToLibrary(
+  progression: Omit<LibraryProgression, 'id' | 'user_id' | 'created_at'>
+): Promise<LibraryProgression> {
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) throw new Error('Not authenticated');
+
+  const { data, error } = await supabase
+    .from('progression_library')
+    .insert({ ...progression, user_id: user.id })
+    .select()
+    .single();
+
+  if (error) throw error;
+  return data;
+}
+
+export async function deleteFromLibrary(id: string): Promise<void> {
+  const { error } = await supabase
+    .from('progression_library')
+    .delete()
+    .eq('id', id);
+
+  if (error) throw error;
+}
+
+export async function copyFromLibrary(
+  libraryId: string,
+  setId: string,
+  position: number
+): Promise<Progression> {
+  const { data: libraryItem, error: fetchError } = await supabase
+    .from('progression_library')
+    .select('*')
+    .eq('id', libraryId)
+    .single();
+
+  if (fetchError) throw fetchError;
+  if (!libraryItem) throw new Error('Library item not found');
+
+  const { data, error } = await supabase
+    .from('progressions')
+    .insert({
+      set_id: setId,
+      name: libraryItem.name,
+      chords: libraryItem.chords,
+      instrument: libraryItem.instrument,
+      notes: libraryItem.notes,
+      audio_path: libraryItem.audio_path,
+      position,
+    })
+    .select()
+    .single();
+
+  if (error) throw error;
+  return data;
 }

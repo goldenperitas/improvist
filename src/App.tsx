@@ -4,6 +4,7 @@ import { Login } from './pages/Login';
 import { Home } from './pages/Home';
 import { SetEditor } from './pages/SetEditor';
 import { PerformanceMode } from './pages/PerformanceMode';
+import { Library } from './pages/Library';
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const { user, loading } = useAuth();
@@ -62,6 +63,14 @@ function App() {
           element={
             <ProtectedRoute>
               <PerformanceMode />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/library"
+          element={
+            <ProtectedRoute>
+              <Library />
             </ProtectedRoute>
           }
         />
