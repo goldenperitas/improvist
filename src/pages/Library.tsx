@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { getLibraryProgressions, deleteFromLibrary, addToLibrary } from '../lib/db';
 import { ArrowLeft, Trash2, Plus } from 'lucide-react';
-import type { LibraryProgression } from '../types';
+import type { LibraryProgression, Progression } from '../types';
 import { ProgressionForm } from '../components/ProgressionForm';
 
 export function Library() {

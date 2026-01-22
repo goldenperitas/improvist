@@ -58,13 +58,24 @@ export function SetEditor() {
   };
 
   const handleSaveProgression = async (
-    data: Omit<Progression, 'id' | 'set_id' | 'created_at'>
+    data: Omit<Progression, 'id' | 'set_id' | 'created_at'> | Omit<LibraryProgression, 'id' | 'user_id' | 'created_at'>
   ) => {
     if (!set) return;
 
     try {
+      // Extract position if it exists, otherwise use current length
+      const position = 'position' in data ? data.position : (set.progressions?.length || 0);
+      const progressionData: Omit<Progression, 'id' | 'set_id' | 'created_at'> = {
+        name: data.name,
+        chords: data.chords,
+        instrument: data.instrument,
+        notes: data.notes,
+        audio_path: data.audio_path,
+        position,
+      };
+
       if (editingProgression) {
-        const updated = await updateProgression(editingProgression.id, data);
+        const updated = await updateProgression(editingProgression.id, progressionData);
         setSet({
           ...set,
           progressions: set.progressions?.map((p) =>
@@ -73,8 +84,7 @@ export function SetEditor() {
         });
         setEditingProgression(null);
       } else {
-        const position = set.progressions?.length || 0;
-        const created = await createProgression(set.id, { ...data, position });
+        const created = await createProgression(set.id, progressionData);
         setSet({
           ...set,
           progressions: [...(set.progressions || []), created],
