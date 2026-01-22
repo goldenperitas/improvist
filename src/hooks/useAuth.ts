@@ -26,8 +26,11 @@ export function useAuth() {
   }, []);
 
   const signInWithEmail = async (email: string) => {
-    // Use environment variable for redirect URL, fallback to current origin
-    const redirectUrl = import.meta.env.VITE_SITE_URL || window.location.origin;
+    // In development, always use current origin. In production, use VITE_SITE_URL if set
+    const isDevelopment = import.meta.env.DEV || window.location.hostname === 'localhost';
+    const redirectUrl = isDevelopment 
+      ? window.location.origin 
+      : (import.meta.env.VITE_SITE_URL || window.location.origin);
     
     const { error } = await supabase.auth.signInWithOtp({
       email,
