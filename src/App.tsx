@@ -5,6 +5,7 @@ import { Home } from './pages/Home';
 import { SetEditor } from './pages/SetEditor';
 import { PerformanceMode } from './pages/PerformanceMode';
 import { Library } from './pages/Library';
+import { AuthCallback } from './pages/AuthCallback';
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const { user, loading } = useAuth();
@@ -38,6 +39,10 @@ function App() {
   return (
     <BrowserRouter>
       <Routes>
+        <Route
+          path="/auth/callback"
+          element={<AuthCallback />}
+        />
         <Route
           path="/login"
           element={user ? <Navigate to="/" replace /> : <Login />}
