@@ -1,19 +1,20 @@
 import { useState } from 'react';
-import type { Progression } from '../types';
+import type { Progression, LibraryProgression } from '../types';
 import { AudioRecorder } from './AudioRecorder';
 import { AudioPlayer } from './AudioPlayer';
 import { uploadAudio } from '../lib/storage';
 import { Upload, X, Plus, Check } from 'lucide-react';
 
 interface ProgressionFormProps {
-  progression?: Progression;
-  onSave: (data: Omit<Progression, 'id' | 'set_id' | 'created_at'>) => void;
+  progression?: Progression | LibraryProgression;
+  onSave: (data: Omit<Progression, 'id' | 'set_id' | 'created_at'> | Omit<LibraryProgression, 'id' | 'user_id' | 'created_at'>) => void;
   onCancel: () => void;
+  isLibrary?: boolean;
 }
 
 const INSTRUMENTS = ['Piano', 'Guitar', 'Bass', 'Synth', 'Drums', 'Vocals', 'Other'];
 
-export function ProgressionForm({ progression, onSave, onCancel }: ProgressionFormProps) {
+export function ProgressionForm({ progression, onSave, onCancel, isLibrary = false }: ProgressionFormProps) {
   const [name, setName] = useState(progression?.name || '');
   const [chords, setChords] = useState(progression?.chords || '');
   const [instrument, setInstrument] = useState(progression?.instrument || '');
@@ -25,14 +26,24 @@ export function ProgressionForm({ progression, onSave, onCancel }: ProgressionFo
     e.preventDefault();
     if (!chords.trim()) return;
 
-    onSave({
+    const baseData = {
       name: name.trim() || undefined,
       chords: chords.trim(),
       instrument: instrument || undefined,
       notes: notes.trim() || undefined,
       audio_path: audioPath || undefined,
-      position: progression?.position || 0,
-    });
+    };
+
+    if (isLibrary) {
+      // For library progressions, don't include position
+      onSave(baseData as Omit<LibraryProgression, 'id' | 'user_id' | 'created_at'>);
+    } else {
+      // For set progressions, include position
+      onSave({
+        ...baseData,
+        position: (progression as Progression)?.position || 0,
+      } as Omit<Progression, 'id' | 'set_id' | 'created_at'>);
+    }
   };
 
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {

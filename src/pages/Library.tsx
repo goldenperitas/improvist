@@ -1,12 +1,14 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { getLibraryProgressions, deleteFromLibrary } from '../lib/db';
-import { ArrowLeft, Trash2 } from 'lucide-react';
+import { getLibraryProgressions, deleteFromLibrary, addToLibrary } from '../lib/db';
+import { ArrowLeft, Trash2, Plus } from 'lucide-react';
 import type { LibraryProgression } from '../types';
+import { ProgressionForm } from '../components/ProgressionForm';
 
 export function Library() {
   const [progressions, setProgressions] = useState<LibraryProgression[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [isCreating, setIsCreating] = useState(false);
 
   useEffect(() => {
     loadLibrary();
@@ -34,25 +36,58 @@ export function Library() {
     }
   };
 
+  const handleSaveProgression = async (
+    data: Omit<LibraryProgression, 'id' | 'user_id' | 'created_at'>
+  ) => {
+    try {
+      const created = await addToLibrary(data);
+      setProgressions([created, ...progressions]);
+      setIsCreating(false);
+    } catch (err) {
+      console.error('Failed to save progression:', err);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gray-900 p-4">
       <div className="max-w-2xl mx-auto">
-        <div className="flex items-center gap-4 mb-8">
-          <Link
-            to="/"
-            className="p-2 border border-white/50 hover:border-white text-white/70 hover:text-white rounded transition-colors flex items-center gap-2"
-          >
-            <ArrowLeft size={18} />
-            Back
-          </Link>
-          <h1 className="text-3xl font-extralight text-white">My Library</h1>
+        <div className="flex items-center justify-between gap-4 mb-8">
+          <div className="flex items-center gap-4">
+            <Link
+              to="/"
+              className="p-2 border border-white/50 hover:border-white text-white/70 hover:text-white rounded transition-colors flex items-center gap-2"
+            >
+              <ArrowLeft size={18} />
+              Back
+            </Link>
+            <h1 className="text-3xl font-extralight text-white">My Library</h1>
+          </div>
+          {!isCreating && (
+            <button
+              onClick={() => setIsCreating(true)}
+              className="px-4 py-2 border border-white/50 hover:border-white text-white/70 hover:text-white rounded-lg transition-colors flex items-center gap-2"
+            >
+              <Plus size={18} />
+              New Progression
+            </button>
+          )}
         </div>
+
+        {isCreating && (
+          <div className="mb-6">
+            <ProgressionForm
+              onSave={handleSaveProgression}
+              onCancel={() => setIsCreating(false)}
+              isLibrary={true}
+            />
+          </div>
+        )}
 
         {isLoading ? (
           <div className="text-gray-400 text-center py-8">Loading library...</div>
-        ) : progressions.length === 0 ? (
+        ) : progressions.length === 0 && !isCreating ? (
           <div className="text-gray-400 text-center py-8">
-            Your library is empty. Save progressions from your sets to build your library!
+            Your library is empty. Create a new progression or save progressions from your sets to build your library!
           </div>
         ) : (
           <div className="space-y-3">
