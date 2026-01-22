@@ -37,10 +37,18 @@ export function Library() {
   };
 
   const handleSaveProgression = async (
-    data: Omit<LibraryProgression, 'id' | 'user_id' | 'created_at'>
+    data: Omit<LibraryProgression, 'id' | 'user_id' | 'created_at'> | Omit<Progression, 'id' | 'set_id' | 'created_at'>
   ) => {
     try {
-      const created = await addToLibrary(data);
+      // Extract only the fields needed for library (exclude position if present)
+      const libraryData: Omit<LibraryProgression, 'id' | 'user_id' | 'created_at'> = {
+        name: data.name,
+        chords: data.chords,
+        instrument: data.instrument,
+        notes: data.notes,
+        audio_path: data.audio_path,
+      };
+      const created = await addToLibrary(libraryData);
       setProgressions([created, ...progressions]);
       setIsCreating(false);
     } catch (err) {

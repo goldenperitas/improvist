@@ -5,9 +5,13 @@ import { AudioPlayer } from './AudioPlayer';
 import { uploadAudio } from '../lib/storage';
 import { Upload, X, Plus, Check } from 'lucide-react';
 
+type ProgressionFormData = 
+  | Omit<Progression, 'id' | 'set_id' | 'created_at'>
+  | Omit<LibraryProgression, 'id' | 'user_id' | 'created_at'>;
+
 interface ProgressionFormProps {
   progression?: Progression | LibraryProgression;
-  onSave: (data: Omit<Progression, 'id' | 'set_id' | 'created_at'> | Omit<LibraryProgression, 'id' | 'user_id' | 'created_at'>) => void;
+  onSave: (data: ProgressionFormData) => void;
   onCancel: () => void;
   isLibrary?: boolean;
 }
