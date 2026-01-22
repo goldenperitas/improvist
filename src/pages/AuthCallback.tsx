@@ -4,7 +4,7 @@ import { supabase } from '../lib/supabase';
 
 /**
  * Handles the OAuth callback from Supabase magic link authentication
- * Extracts the session from URL hash and redirects to home
+ * Extracts the session from URL hash/query params and redirects to home
  */
 export function AuthCallback() {
   const navigate = useNavigate();
@@ -12,21 +12,27 @@ export function AuthCallback() {
   useEffect(() => {
     const handleAuthCallback = async () => {
       try {
-        // Get the hash from the URL (Supabase puts tokens in the hash)
+        // Supabase puts tokens in the hash fragment
         const hashParams = new URLSearchParams(window.location.hash.substring(1));
         const accessToken = hashParams.get('access_token');
         const refreshToken = hashParams.get('refresh_token');
         const error = hashParams.get('error');
         const errorDescription = hashParams.get('error_description');
 
-        if (error) {
-          console.error('Auth error:', error, errorDescription);
-          navigate('/login?error=' + encodeURIComponent(errorDescription || error));
+        // Also check query params as fallback
+        const queryParams = new URLSearchParams(window.location.search);
+        const queryError = queryParams.get('error');
+        const queryErrorDescription = queryParams.get('error_description');
+
+        if (error || queryError) {
+          const errorMsg = errorDescription || queryErrorDescription || error || queryError || 'Authentication failed';
+          console.error('Auth error:', errorMsg);
+          navigate('/login?error=' + encodeURIComponent(errorMsg));
           return;
         }
 
         if (accessToken && refreshToken) {
-          // Set the session
+          // Set the session using the tokens from the URL
           const { data, error: sessionError } = await supabase.auth.setSession({
             access_token: accessToken,
             refresh_token: refreshToken,
@@ -41,17 +47,23 @@ export function AuthCallback() {
           if (data.session) {
             // Successfully authenticated, redirect to home
             navigate('/', { replace: true });
-          }
-        } else {
-          // Try to get session from current URL (fallback)
-          const { data: { session }, error: sessionError } = await supabase.auth.getSession();
-          
-          if (sessionError || !session) {
-            navigate('/login?error=invalid_session');
             return;
           }
+        }
 
+        // Fallback: Check if we already have a session (might have been set automatically)
+        const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+        
+        if (sessionError) {
+          console.error('Session error:', sessionError);
+          navigate('/login?error=' + encodeURIComponent(sessionError.message));
+          return;
+        }
+
+        if (session) {
           navigate('/', { replace: true });
+        } else {
+          navigate('/login?error=invalid_session');
         }
       } catch (err) {
         console.error('Auth callback error:', err);
